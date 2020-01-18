@@ -1,7 +1,7 @@
 import json
 import socket
 
-# Lumin: I was lazy to write a duplex connection nor a tcp connection.
+# Lumin: I was lazy to write a duplex connection or a tcp connection.
 #           the following code is 'borrowed' from:
 #               https://github.com/mdebbar/jsonsocket
 #           with minor changes so it can work in python3
