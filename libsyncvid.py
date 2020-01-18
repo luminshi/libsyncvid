@@ -48,13 +48,19 @@ class VideoController:
         p1.stdout.close()
         output, err = p2.communicate()
 
+        # TODO: handle exceptions
         if err is not None:
             exit(-1)
         elif output == '':
             print("connection refused")
             exit(-2)
         else:
-            return json.loads(output)['data']
+            try:
+                json_data = json.loads(output)
+                return json_data['data']
+            except:
+                sleep(1)
+                return self.__getter(property_name)
 
     def __setter(self, property_name, property_val):
         p1 = subprocess.Popen(["echo",
@@ -104,15 +110,26 @@ class VideoServer(VideoController):
                 self.play_status = self.get_play_status()
                 self.__change_client_status()
 
-            # send a heartbeat signal for every 5 secs.
-            if while_counter > 500:
-                # send the signal to keep the tcp connection alive
-                self.connection.send({'action': 'heartbeat'})
+            # send a query for client time-pos every so often.
+            if while_counter > 10:
+                # get client time-pos
+                self.connection.send({'action': 'get', 'property': 'time-pos'})
+                client_data = self.connection.recv()
+                client_time_pos = float(client_data['data'])
+                # get local time-pos
+                local_time_pos = float(self.get_time_pos())
+
+                # compare the two time-pos, if the diff is larger than 10 sec
+                # we adjust play status
+                # for now, it will just make sure client goes back to the server's time pos.
+                if abs(local_time_pos - client_time_pos) >= 10.0:
+                    self.__change_client_status()
+
                 # reset while counter
                 while_counter = 0
 
             while_counter += 1
-            sleep(0.01)
+            sleep(0.1)
 
         # signal client that the entire program has exited.
 
@@ -141,7 +158,7 @@ class VideoServer(VideoController):
                 if client_data['data'] == "buffered":
                     client_ready = True
                 else:  # the client is still buffering
-                    sleep(2)
+                    sleep(1)
 
             # command the client to play vid
             self.connection.send({"action": "set", "property": "paused", "property-val": False})
@@ -179,6 +196,8 @@ class VideoClient(VideoController):
             if server_data["action"] == "get":
                 if server_data["property"] == "paused-for-cache":
                     data_to_send = {"data": self.get_buffering_status()}
+                elif server_data["property"] == "time-pos":
+                    data_to_send = {"data": self.get_time_pos()}
             elif server_data["action"] == "set":
                 if server_data["property"] == "time-pos":
                     print("seeking data")

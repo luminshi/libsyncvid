@@ -1,6 +1,9 @@
 # libsyncvid
 To sync video playback status of two mpv processes
 
+## Dependencies:
+`python3`, `socat`, and  `mpv`
+
 ## Usages:
 
 ```
