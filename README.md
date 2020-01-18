@@ -1,5 +1,6 @@
 # libsyncvid
-To sync video playback status of two mpv processes
+To sync video playback status of two mpv processes.
+Tested on MacOS and Ubuntu 18.04 only.
 
 ## Dependencies:
 `python3`, `socat`, and  `mpv`
