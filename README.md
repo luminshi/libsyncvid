@@ -9,7 +9,7 @@ To sync video playback status of two mpv processes
 ```
 usage: syncvid.py [-h] (-s | -c serverIP) [-p PORT] video_path
 
-sync video playback state between two (maybe more) video players with low
+sync video playback state between two (maybe more in the future) video players with low
 latency.
 
 positional arguments:
